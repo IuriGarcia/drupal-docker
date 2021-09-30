@@ -1,0 +1,39 @@
+version: "3"
+services:
+  # MySQL Server
+  database:
+    image: mysql:5.7.23
+    environment:
+      MYSQL_DATABASE: lp_drupal
+      MYSQL_ROOT_PASSWORD: 'rootpwd'
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./Drupal-PCliente/common.sql:/docker-entrypoint-initdb.d/common.sql # popula o bd durante startup 
+      - ./mysql-config:/etc/mysql/conf.d
+      - data:/var/lib/mysql
+    restart: always
+
+  drupal:
+#    image: drupal:8-apache
+    build:
+     context: .
+    ports:
+      - 8080:80
+    depends_on:
+      - database
+    environment:
+      # Drupal settings
+      DRUPAL_PROFILE: standard
+      DRUPAL_SITE_NAME: Teste do Drupal
+      DRUPAL_USER: admin
+      DRUPAL_PASS: admin
+      DRUPAL_DBURL: mysql://root:rootpwd@database:3306/lp_drupal
+    volumes:
+       - ./Drupal-PCliente:/tmp/Drupal-PCliente
+       - ./LandingPage:/tmp/LandingPage
+    restart: always
+
+volumes:
+  data:
+#  sites:
